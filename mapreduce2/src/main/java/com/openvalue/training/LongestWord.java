@@ -26,12 +26,12 @@ import org.apache.hadoop.mapred.TextOutputFormat;
 
 public class LongestWord {
 
-	static HashMap<String,Integer> mapTextOccurence = new HashMap<String,Integer>();
+	static HashMap<String,Integer> mMapTextOccurence = new HashMap<String,Integer>();
 
 	public static class Map extends MapReduceBase implements
 	Mapper<LongWritable, Text, Text, IntWritable> {
-		private final static IntWritable one = new IntWritable(1);
-		private Text word = new Text();
+		private final static IntWritable mOne = new IntWritable(1);
+		private Text mWord = new Text();
 
 		public void map(LongWritable key, Text value,
 				OutputCollector<Text, IntWritable> output, Reporter reporter)
@@ -39,8 +39,8 @@ public class LongestWord {
 			String line = value.toString();
 			StringTokenizer tokenizer = new StringTokenizer(line);
 			while (tokenizer.hasMoreTokens()) {
-				word.set(tokenizer.nextToken());
-				output.collect(word, one);
+				mWord.set(tokenizer.nextToken());
+				output.collect(mWord, mOne);
 			}
 		}
 	}
@@ -49,27 +49,29 @@ public class LongestWord {
 		public void reduce(Text key, Iterator<IntWritable> values,
 				OutputCollector<Text, IntWritable> output, Reporter reporter)
 						throws IOException {
-			int sum = 0;
+			int lSum = 0;
 			while (values.hasNext()) {
-				sum += values.next().get();
+				lSum += values.next().get();
 			}
-			mapTextOccurence.put(key.toString(),sum);
-			List<String> keyWithSameOcc = new ArrayList<String>();
-			for(Entry<String,Integer> entry : mapTextOccurence.entrySet()){
-				if(entry.getValue().equals(sum)){
-					keyWithSameOcc.add(entry.getKey());
+			mMapTextOccurence.put(key.toString(),lSum);
+			List<String> lKeyWithSameOcc = new ArrayList<String>();
+			for(Entry<String,Integer> entry : mMapTextOccurence.entrySet()){
+				if(entry.getValue().equals(lSum)){
+					lKeyWithSameOcc.add(entry.getKey());
 				}
 			}
-			int max = 0;
-			String longsetWord ="";
-			for(String name: keyWithSameOcc){
-				if(name.length() > max){
-					max = name.length();
-					longsetWord = name;
+			int lMax = 0;
+			String lLongestWord ="";
+			for(String lName: lKeyWithSameOcc){
+				if(lName.length() > lMax){
+					lMax = lName.length();
+					lLongestWord = lName;
 				}
 			}
-			Text word = new Text(longsetWord);
-			output.collect(word, new IntWritable(sum));
+			if(lLongestWord.isEmpty()){
+			Text word = new Text(lLongestWord);
+			output.collect(word, new IntWritable(lSum));
+			}
 		}
 	}
 	public static void main(String[] args) throws Exception {
